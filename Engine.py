@@ -73,8 +73,10 @@ class InferenceEngineTG:
         if offloading:
             self.model = LlamaForCausalLM_TG.from_pretrained(model_name_or_path, torch_dtype=dtype)
             self.model.eval()
-            device_map = accelerate.infer_auto_device_map(self.model, max_memory={0: 35 * (1 << 30), "cpu": 120 * (1 << 30)}, dtype=torch.float16)
-            self.model = accelerate.dispatch_model(self.model, main_device="cuda:0", device_map=device_map)
+            # device_map = accelerate.infer_auto_device_map(self.model, max_memory={0: 35 * (1 << 30), "cpu": 120 * (1 << 30)}, dtype=torch.float16)
+            # self.model = accelerate.dispatch_model(self.model, main_device="cuda:0", device_map=device_map)
+
+            self.model = accelerate.cpu_offload(self.model, execution_device=self.device)
         else:
             self.model = LlamaForCausalLM_TG.from_pretrained(model_name_or_path, torch_dtype=dtype, device_map=device)
             self.model.eval()

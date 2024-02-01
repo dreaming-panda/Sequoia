@@ -1,17 +1,20 @@
 import torch
 torch.set_printoptions(profile="full")
 import json
+from tqdm import tqdm
 from copy import deepcopy
-p = torch.tensor([0.0, 0.7151, 0.0871, 0.0388, 0.0230, 0.0171, 0.0131, 0.0077, 0.0073, 0.0074,
-        0.0060, 0.0068, 0.0046, 0.0039, 0.0033, 0.0030, 0.0027, 0.0019, 0.0032,
-        0.0019, 0.0013, 0.0020, 0.0020, 0.0014, 0.0011, 0.0025, 0.0014, 0.0018,
-        0.0014, 0.0010, 0.0013, 0.0011, 0.0011])
+p = torch.tensor([0.0, 0.8480, 8.6126e-02, 2.7199e-02, 1.1198e-02, 6.2547e-03, 4.0326e-03, 2.9872e-03,
+        1.9144e-03, 1.5849e-03, 1.5069e-03, 9.6941e-04, 7.7558e-04, 5.2512e-04,
+        7.0280e-04, 4.2999e-04, 3.3933e-04, 5.3316e-04, 4.8459e-05, 4.3625e-04,
+        3.3927e-04, 1.9389e-04, 1.4544e-04, 1.4544e-04, 1.2118e-04, 1.9383e-04,
+        0.0000e+00, 1.8549e-04, 1.4538e-04, 9.6977e-05, 9.6917e-05, 9.6977e-05,
+        1.9383e-04])
 
 max_branch = p.shape[0] - 1
 
-max_depth = 15
+max_depth = 25
 
-max_budget = 128
+max_budget = 1024
 
 T = torch.zeros((max_budget + 1, max_depth + 1, max_branch + 1)).fill_(-torch.inf)
 T_max = torch.zeros((max_budget + 1, max_depth + 1))
@@ -23,7 +26,7 @@ for l in range(1, max_depth + 1):
             branch_map[(1,l,b)] = []
 
 
-for m in range(2, max_budget+1):
+for m in tqdm(range(2, max_budget+1)):
     for l in range(2, max_depth + 1):
         T[m][l][1] = 1 + p[1] * T[m-1][l-1].max()
         if T[m][l][1] > 0:
@@ -49,21 +52,19 @@ for m in range(2, max_budget+1):
 
 results = T.max(dim=2).values
 print(results)
-draft_inference_time = 0.0003
+draft_inference_time = 0.03
 target_verify_time = [
-                    0.025389132499694825,
-                    0.026791603565216066,
-                    0.02815108060836792,
-                    0.027077696323394775,
-                    0.026819372177124025,
-                    0.027583310604095457,
-                    0.02725379467010498,
-                    0.02948847532272339,
-
+                    14.4,
+                    14.454617953300476,
+                    14.537516283988953,
+                    15.425514483451844,
+                    15.499003720283508,
+                    15.73095190525055,
+                    16.400382113456725
                     ]
 
 
-valid_budget = [1, 2, 4, 8, 16, 32, 64, 128]
+valid_budget = [1, 64, 128, 256, 512, 768, 1024]
 
 dec_time = torch.inf
 pairs = None
@@ -132,7 +133,7 @@ grow_map = {
     "size": num_nodes
 }
 
-path = "./growmaps/68m_7b-sto_02.pt"
+path = "./growmaps/7b_70b-greedy-1024-real-greedy.pt"
 
 torch.save(grow_map, path)
 

@@ -248,6 +248,7 @@ else:
     idx_lists = grow_map["roots"]
     branch_lists = grow_map['branches']
     draft_step = len(grow_map["roots"])
+    
     sampling_callables = {}
     sample_gather_indices = {}
     for i in range(draft_step - 1):

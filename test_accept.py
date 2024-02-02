@@ -125,7 +125,7 @@ def simulation_greedy_with_tree_fast_benchmark_cover(target_model : GraphInferen
                                     position_ids = position_ids, max_width=w)
                 
                 
-                valid_tokens, draft_kv_len, target_kv_len,  b = spectree.verify(benchmark=True)
+                valid_tokens, draft_kv_len, target_kv_len,  b, terminate = spectree.verify(benchmark=True)
                 branch_prob[b] += 1
                 
                 

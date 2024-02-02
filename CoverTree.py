@@ -448,24 +448,30 @@ class CoverTreeTest(Tree):
         
         accept_list = list(range(self.ground_truth_len))
         b = -1
+        terminal = False
         while True:
             parent_id = accept_list[-1]
             children_accept = self.accept_step(parent_id=parent_id)
             if children_accept.accept_mark == 0:
                 accept_list.append(children_accept.position)
                 b = children_accept.successor_order
+                if self.tokens[children_accept.position] == 2 or self.tokens[children_accept.position] == 0:
+                     terminal = True
             else:
                 break
-        
-        last_token = self.target_token[accept_list[-1] - self.ground_truth_len + 1].reshape(1)
-
         accept_tokens = self.tokens[accept_list]
-        valid_tokens = torch.cat([accept_tokens, last_token], dim=-1)
+        if not terminal:
+            last_token = self.target_token[accept_list[-1] - self.ground_truth_len + 1].reshape(1)
+            valid_tokens = torch.cat([accept_tokens, last_token], dim=-1)
+            
+            self.draft_model_engine.gather_kv(accept_list)
+            self.target_model_engine.gather_kv(accept_list)
+
+            return valid_tokens, len(accept_list), len(accept_list), b, terminal
+        else:
+            return accept_tokens, len(accept_list), len(accept_list), b, terminal
+       
         
-        self.draft_model_engine.gather_kv(accept_list)
-        self.target_model_engine.gather_kv(accept_list)
-        
-        return valid_tokens, len(accept_list), len(accept_list), b
     
     def verbose(self):
         super().verbose()

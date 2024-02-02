@@ -3,18 +3,18 @@ torch.set_printoptions(profile="full")
 import json
 from tqdm import tqdm
 from copy import deepcopy
-p = torch.tensor([0.0, 0.8480, 8.6126e-02, 2.7199e-02, 1.1198e-02, 6.2547e-03, 4.0326e-03, 2.9872e-03,
-        1.9144e-03, 1.5849e-03, 1.5069e-03, 9.6941e-04, 7.7558e-04, 5.2512e-04,
-        7.0280e-04, 4.2999e-04, 3.3933e-04, 5.3316e-04, 4.8459e-05, 4.3625e-04,
-        3.3927e-04, 1.9389e-04, 1.4544e-04, 1.4544e-04, 1.2118e-04, 1.9383e-04,
-        0.0000e+00, 1.8549e-04, 1.4538e-04, 9.6977e-05, 9.6917e-05, 9.6977e-05,
-        1.9383e-04])
+p = torch.tensor([0.0, 7.0984e-01, 9.1775e-02, 3.9842e-02, 2.2074e-02, 1.4746e-02, 1.3647e-02,
+        9.6171e-03, 6.2282e-03, 4.9460e-03, 4.5796e-03, 3.8469e-03, 4.5796e-03,
+        3.0225e-03, 2.5646e-03, 2.1982e-03, 1.8318e-03, 2.1066e-03, 8.2433e-04,
+        1.9234e-03, 7.3273e-04, 1.0991e-03, 1.0075e-03, 1.2823e-03, 8.2433e-04,
+        1.3739e-03, 1.0075e-03, 3.6637e-04, 1.0991e-03, 5.4955e-04, 8.2433e-04,
+        5.4955e-04, 8.2433e-04])
 
 max_branch = p.shape[0] - 1
 
-max_depth = 25
+max_depth = 15
 
-max_budget = 1024
+max_budget = 128
 
 T = torch.zeros((max_budget + 1, max_depth + 1, max_branch + 1)).fill_(-torch.inf)
 T_max = torch.zeros((max_budget + 1, max_depth + 1))
@@ -52,19 +52,20 @@ for m in tqdm(range(2, max_budget+1)):
 
 results = T.max(dim=2).values
 print(results)
-draft_inference_time = 0.03
+draft_inference_time = 0.0003
 target_verify_time = [
-                    14.4,
-                    14.454617953300476,
-                    14.537516283988953,
-                    15.425514483451844,
-                    15.499003720283508,
-                    15.73095190525055,
-                    16.400382113456725
+0.03912119388580322,
+0.04097423076629639,
+0.041138229370117185,
+0.04153526782989502,
+0.04215144872665405,
+0.04696519374847412,
+0.04878691196441651,
+0.05441854238510132,
                     ]
 
 
-valid_budget = [1, 64, 128, 256, 512, 768, 1024]
+valid_budget = [1, 2, 4, 8, 16, 32, 64, 128]
 
 dec_time = torch.inf
 pairs = None
@@ -133,7 +134,7 @@ grow_map = {
     "size": num_nodes
 }
 
-path = "./growmaps/7b_70b-greedy-1024-real-greedy.pt"
+path = "./growmaps/68m_for_13b-new.pt"
 
 torch.save(grow_map, path)
 
